@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Frost DK — Cooldown Manager configurator &amp; rotation quiz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frost DK — Rotation Quiz</title>
 <style>
   :root{
     --bg:#0f0f10; --panel:#1a1a1c; --panel2:#212124; --border:#33333a; --border-strong:#4a4a54;
     --text:#eae8e0; --text-secondary:#a8a6a0; --text-muted:#78766f;
     --gold:#e8b339; --red:#c0392b; --green:#3fae5a; --blue:#4aa3d8; --purple:#9b6fd8;
-    --ess-border:#e8b339; --cd-border:#4aa3d8; --buff-border:#9b6fd8; --pool-border:#4a4a54;
+    --pool-border:#4a4a54;
   }
   *{box-sizing:border-box}
   html{overflow-x:hidden}
@@ -16,91 +17,32 @@
   .wrap{max-width:900px;width:100%;margin:0 auto;overflow-x:hidden}
   h1{font-size:21px;font-weight:700;margin:0 0 4px;font-family:Georgia,'Times New Roman',serif;color:#f2d98a;letter-spacing:.01em}
   .sub{color:var(--text-secondary);font-size:14px;margin:0 0 1.5rem}
-  .tabs{display:flex;gap:6px;margin-bottom:1.5rem;border-bottom:1px solid var(--border)}
-  .tabbtn{background:none;border:none;color:var(--text-secondary);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;font-family:Georgia,serif}
-  .tabbtn.active{color:var(--gold);border-bottom-color:var(--gold)}
-  .panel{display:none}
-  .panel.active{display:block}
-  h2{font-size:15px;font-weight:700;margin:1.75rem 0 0.5rem;font-family:Georgia,serif;color:#d8c58a;border-bottom:1px solid #33301f;padding-bottom:4px}
-  h2:first-child{margin-top:0}
-  p.hint{color:var(--text-secondary);font-size:13px;margin:0 0 0.75rem}
+  .backlink{display:inline-block;color:var(--text-muted);font-size:12px;text-decoration:none;margin-bottom:1rem}
+  .backlink:hover{color:var(--gold)}
 
-  /* preview bar styled after the uploaded cooldown-manager screenshot */
+  /* ability bar styled after the in-game cooldown manager */
   .preview{background:#141414;border:2px solid #000;box-shadow:0 0 0 1px #4a3a1a, inset 0 0 12px rgba(0,0,0,0.6);border-radius:2px;padding:8px;margin-bottom:1.25rem}
   .preview-power{height:20px;background:#0a0a0a;border:1px solid #000;border-radius:1px;margin:0 0 5px;position:relative;overflow:hidden}
   .preview-power-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(180deg,#5ab8e8,#2f7ea8);box-shadow:inset 0 1px 0 rgba(255,255,255,0.25);transition:width .15s}
   .preview-power-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;text-shadow:0 1px 2px #000,0 0 4px #000;z-index:2}
-  .preview-power-label{display:flex;justify-content:space-between;font-size:9px;color:#6a6860;text-transform:uppercase;letter-spacing:.06em;margin:0 0 3px;font-weight:600}
   .preview-runes{display:flex;gap:3px;margin:0 0 8px}
   .preview-rune{flex:1;height:13px;border:1px solid #000;border-radius:1px;background:#0a0a0a;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);cursor:default}
   .preview-rune.ready{background:linear-gradient(180deg,#7fd4f0,#3a8fb8);box-shadow:inset 0 1px 0 rgba(255,255,255,0.35)}
   .preview-row{display:flex;justify-content:center;gap:2px;margin-top:4px;min-height:38px;flex-wrap:wrap;background:rgba(0,0,0,0.25);padding:3px;border-radius:2px}
   .preview-row-label{font-size:9px;color:#6a6860;text-transform:uppercase;letter-spacing:.06em;margin-top:7px;font-weight:600}
-  .icon{width:38px;height:38px;border-radius:2px;overflow:hidden;position:relative;flex:0 0 auto;user-select:none;cursor:grab;border:1px solid #000;background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12), 0 1px 2px rgba(0,0,0,0.6)}
+  .icon{width:38px;height:38px;border-radius:2px;overflow:hidden;position:relative;flex:0 0 auto;user-select:none;border:1px solid #000;background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12), 0 1px 2px rgba(0,0,0,0.6)}
   .icon img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.05)}
   .icon .stack{position:absolute;bottom:-1px;right:-1px;background:#000;border:1px solid #000;border-radius:2px 0 0 0;font-size:14px;padding:0 4px;font-weight:800;color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000;font-family:Georgia,serif;z-index:3;line-height:1.5}
   .icon.clickable{cursor:pointer}
   .icon.noresource img{filter:brightness(0.42) grayscale(0.75) saturate(0.8)}
   .icon.oncd img{filter:brightness(0.5) saturate(0.5)}
-  .icon .swipe{position:absolute;inset:0;pointer-events:none;z-index:2}
-  .icon .cdtext{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#dff3ff;text-shadow:0 1px 2px #000,0 0 5px #000,0 0 8px #000;font-family:-apple-system,sans-serif;z-index:3}
-  .icon.denied{animation:denyflash .4s}
-  @keyframes denyflash{0%,100%{box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12), 0 1px 2px rgba(0,0,0,0.6)}50%{box-shadow:0 0 0 2px #c0392b, inset 0 0 0 1px rgba(255,255,255,0.12)}}
-  .icon.used{animation:useflash .35s}
-  @keyframes useflash{0%{box-shadow:0 0 0 2px #7fd4f0}100%{box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12), 0 1px 2px rgba(0,0,0,0.6)}}
   .icon.big{width:48px;height:48px}
   .icon.qcorrect{box-shadow:0 0 0 2px var(--green), 0 0 8px rgba(63,174,90,0.6)}
   .icon.qwrong{box-shadow:0 0 0 2px var(--red), 0 0 8px rgba(192,57,43,0.6)}
   .icon.activebuff{box-shadow:0 0 0 2px var(--gold), 0 0 10px rgba(232,179,57,0.55)}
 
-  /* pools */
-  .zones{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
-  @media(max-width:600px){.zones{grid-template-columns:1fr}}
-  .zone{background:var(--panel);border:1px dashed var(--border-strong);border-radius:8px;padding:10px;min-height:70px}
-  .zone.full-width{grid-column:1/-1}
-  .zone-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:8px;display:flex;justify-content:space-between}
-  .zone-icons{display:flex;flex-wrap:wrap;gap:6px;min-height:40px}
-  .zone.dragover{border-color:var(--gold);background:#242018}
-  .abicon{width:44px;height:44px;border-radius:3px;border:2px solid var(--pool-border);overflow:hidden;cursor:grab;position:relative;background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1), 0 1px 3px rgba(0,0,0,0.6)}
-  .abicon img{width:100%;height:100%;object-fit:cover;display:block}
-  .abicon .lbl{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text-muted);white-space:nowrap}
-  .abicon.essential{border-color:var(--ess-border)}
-  .abicon.cooldowns{border-color:var(--cd-border)}
-  .abicon.buffs{border-color:var(--buff-border)}
-  .abrow{display:flex;flex-wrap:wrap;gap:14px 10px;padding-bottom:14px}
-
-  .note{background:#2a2210;border:1px solid #5a4818;border-radius:8px;padding:0.7rem 0.9rem;font-size:13px;color:#e8c366;margin:1rem 0}
-  table{width:100%;border-collapse:collapse;font-size:13px;margin:0.5rem 0 1rem}
-  th{text-align:left;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;padding:5px 8px;border-bottom:1px solid var(--border-strong)}
-  td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
-
   /* quiz */
-  .quizcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem}
-  .statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1rem}
-  @media(max-width:560px){.statgrid{grid-template-columns:1fr}}
-  .stat{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
-  .stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
-  .stat-value{font-size:14px;font-weight:600}
-  .rp-bar{height:9px;background:#0a0a0a;border:1px solid #000;border-radius:1px;overflow:hidden;margin-top:4px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.8)}
-  .rp-fill{height:100%;background:linear-gradient(180deg,#5ab8e8,#2f7ea8);box-shadow:inset 0 1px 0 rgba(255,255,255,0.25)}
-  .runes{display:flex;gap:3px;margin-top:4px}
-  .rune{width:15px;height:15px;border-radius:2px;background:#1a1a1a;border:1px solid #000;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05)}
-  .rune.ready{background:linear-gradient(180deg,#4fc86a,#2a7a3e);box-shadow:inset 0 1px 0 rgba(255,255,255,0.3)}
-  .buffchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-  .chip{font-size:11px;padding:3px 8px;border-radius:20px;border:1px solid var(--border-strong);color:var(--text-secondary)}
-  .chip.on{background:#3a2a10;border-color:var(--gold);color:var(--gold)}
   .qtitle{font-size:14px;font-weight:600;margin-bottom:10px}
-  .choices{display:flex;justify-content:center;flex-wrap:wrap;gap:14px 12px}
-  .choicebtn{display:flex;flex-direction:column;align-items:center;gap:0;background:none;border:none;padding:0;cursor:pointer}
-  .choicebtn .picon{width:48px;height:48px;border-radius:3px;border:2px solid var(--pool-border);overflow:hidden;background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1), 0 1px 3px rgba(0,0,0,0.6);position:relative}
-  .choicebtn .picon img{width:100%;height:100%;object-fit:cover;display:block}
-  .choicebtn .clabel{font-size:11px;color:var(--text-secondary);margin-top:5px;max-width:70px;text-align:center;line-height:1.3}
-  .choicebtn:hover .picon{border-color:var(--gold)}
-  .choicebtn.correct .picon{border-color:var(--green);box-shadow:0 0 0 2px var(--green)}
-  .choicebtn.wrong .picon{border-color:var(--red);box-shadow:0 0 0 2px var(--red)}
-  .choicebtn .picon.noresource img{filter:brightness(0.42) grayscale(0.75) saturate(0.8)}
-  .choicebtn .picon.oncd img{filter:brightness(0.5) saturate(0.5)}
-  .targetstag{margin-left:auto;background:#2a2210;border:1px solid #5a4818;color:#e8c366;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:none;letter-spacing:0}
   .feedback{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.5}
   .feedback.ok{background:#123a1c;border:1px solid var(--green);color:#a8e8b8}
   .feedback.bad{background:#3a1414;border:1px solid var(--red);color:#e8a8a8}
@@ -120,99 +62,30 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Frost death knight — Cooldown Manager configurator &amp; rotation quiz</h1>
-  <p class="sub">Patch 12.1. Damage abilities only — build your bar layout, then quiz yourself on what to press next.</p>
+  <a class="backlink" href="../index.html">← All specs</a>
+  <h1>Frost death knight — rotation quiz</h1>
+  <p class="sub">Patch 12.1. Read the resource and proc state, then press what comes next. Scenarios are drawn from real top-parse cast distributions.</p>
 
-  <div class="tabs">
-    <button class="tabbtn active" data-tab="quiz">Rotation quiz</button>
-    <button class="tabbtn" data-tab="config">Configure cooldown manager</button>
+  <div class="scoreline" id="scoreline">Score: 0 / 0</div>
+  <div class="targetsel">
+    <span class="targetsel-label">Targets:</span>
+    <button class="targetbtn active" data-targets="1">1</button>
+    <button class="targetbtn" data-targets="2">2</button>
+    <button class="targetbtn" data-targets="5">5</button>
+  </div>
+  <div class="qtitle" id="qPrompt">1 target — what should you press next? Click the ability below.</div>
+
+  <div class="preview" id="quizPreview">
+    <div class="preview-row-label" style="margin-top:0">Buffs</div>
+    <div class="preview-row" id="qBuffsRow"></div>
+    <div class="preview-runes" id="qRunesGrid" style="margin-top:8px"></div>
+    <div class="preview-power"><div class="preview-power-fill" id="qRPfill" style="width:0%"></div><div class="preview-power-num" id="qRPnum">0 / 100</div></div>
+    <div class="preview-row-label">Abilities — click your answer</div>
+    <div class="preview-row" id="qAbilityRow"></div>
   </div>
 
-  <!-- ============ CONFIG TAB ============ -->
-  <div class="panel" id="panel-config">
-    <div class="note">Blizzard's Cooldown Manager (added patch 11.1.5) has four real panes — Essential Cooldowns, Utility Cooldowns, Tracked Buffs, and Tracked Bars — configured by dragging ability icons between them in Edit Mode. This tool mirrors that for Frost DK's damage kit only (no defensives/utility). Drag icons between the zones below; the preview updates live.</div>
-
-    <h2>Live preview</h2>
-    <div class="preview" id="preview">
-      <div class="preview-power-label">Runic Power</div>
-      <div class="preview-power"><div class="preview-power-fill" id="prevPowerFill"></div><div class="preview-power-num" id="rpNum">40 / 100</div></div>
-      <div class="preview-runes" id="prevRunes"></div>
-      <p class="hint" style="margin:2px 0 0">Click an ability below to test it — spends resources, starts cooldowns, and shows the resulting shading. Click again to reset.</p>
-      <div class="preview-row-label">Essential cooldowns</div>
-      <div class="preview-row" id="prevEssential"></div>
-      <div class="preview-row-label">Cooldowns</div>
-      <div class="preview-row" id="prevCooldowns"></div>
-      <div class="preview-row-label">Tracked buffs</div>
-      <div class="preview-row" id="prevBuffs"></div>
-      <button class="nextbtn" id="resetSim" style="margin-top:8px">Reset preview state</button>
-    </div>
-
-    <h2>Ability pool — drag to assign</h2>
-    <p class="hint">Damage-relevant Frost DK abilities and procs only. Drop into a zone below, or back into "Unassigned" to remove from the bar.</p>
-
-    <div class="zones">
-      <div class="zone full-width" id="zone-essential" ondrop="drop(event,'essential')" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
-        <div class="zone-title">Essential cooldowns <span>rotational buttons</span></div>
-        <div class="zone-icons" id="icons-essential"></div>
-      </div>
-      <div class="zone full-width" id="zone-cooldowns" ondrop="drop(event,'cooldowns')" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
-        <div class="zone-title">Cooldowns <span>major damage CDs</span></div>
-        <div class="zone-icons" id="icons-cooldowns"></div>
-      </div>
-      <div class="zone full-width" id="zone-buffs" ondrop="drop(event,'buffs')" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
-        <div class="zone-title">Tracked buffs <span>procs to watch</span></div>
-        <div class="zone-icons" id="icons-buffs"></div>
-      </div>
-      <div class="zone full-width" id="zone-unassigned" ondrop="drop(event,'unassigned')" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
-        <div class="zone-title">Unassigned <span>not shown on bar</span></div>
-        <div class="zone-icons" id="icons-unassigned"></div>
-      </div>
-    </div>
-
-    <h2>What's in the pool</h2>
-    <div style="overflow-x:auto;max-width:100%">
-    <table>
-      <tr><th>Ability</th><th>Type</th><th>Cost / trigger</th></tr>
-      <tr><td>Obliterate</td><td>Essential</td><td>1 Rune</td></tr>
-      <tr><td>Frostscythe</td><td>Essential</td><td>1 Rune, 2+ targets</td></tr>
-      <tr><td>Frost Strike</td><td>Essential</td><td>Runic Power</td></tr>
-      <tr><td>Glacial Advance</td><td>Essential</td><td>Runic Power, 3+ targets</td></tr>
-      <tr><td>Howling Blast</td><td>Essential</td><td>1 Rune (free with Rime), only cast with Rime</td></tr>
-      <tr><td>Empower Rune Weapon</td><td>Cooldown</td><td>2 charges, off GCD</td></tr>
-      <tr><td>Pillar of Frost</td><td>Cooldown</td><td>45s cooldown</td></tr>
-      <tr><td>Frostwyrm's Fury</td><td>Cooldown</td><td>~1.5–2min cooldown</td></tr>
-      <tr><td>Breath of Sindragosa</td><td>Cooldown</td><td>talent, drains Runic Power</td></tr>
-      <tr><td>Reaper's Mark</td><td>Cooldown</td><td>Deathbringer talent, 45s</td></tr>
-      <tr><td>Killing Machine</td><td>Tracked buff</td><td>proc from auto-crit</td></tr>
-      <tr><td>Rime</td><td>Tracked buff</td><td>proc, empowers Howling Blast</td></tr>
-      <tr><td>Bonegrinder</td><td>Tracked buff</td><td>5 stacks = 20% damage</td></tr>
-    </table>
-    </div>
-  </div>
-
-  <!-- ============ QUIZ TAB ============ -->
-  <div class="panel active" id="panel-quiz">
-    <div class="scoreline" id="scoreline">Score: 0 / 0</div>
-    <div class="targetsel">
-      <span class="targetsel-label">Targets:</span>
-      <button class="targetbtn active" data-targets="1">1</button>
-      <button class="targetbtn" data-targets="2">2</button>
-      <button class="targetbtn" data-targets="5">5</button>
-    </div>
-    <div class="qtitle" id="qPrompt">1 target — what should you press next? Click the ability below.</div>
-
-    <div class="preview" id="quizPreview">
-      <div class="preview-row-label" style="margin-top:0">Buffs</div>
-      <div class="preview-row" id="qBuffsRow"></div>
-      <div class="preview-runes" id="qRunesGrid" style="margin-top:8px"></div>
-      <div class="preview-power"><div class="preview-power-fill" id="qRPfill" style="width:0%"></div><div class="preview-power-num" id="qRPnum">0 / 100</div></div>
-      <div class="preview-row-label">Abilities — click your answer</div>
-      <div class="preview-row" id="qAbilityRow"></div>
-    </div>
-
-    <div id="qFeedback"></div>
-    <button class="nextbtn" id="qNext" style="display:none">Next question →</button>
-  </div>
+  <div id="qFeedback"></div>
+  <button class="nextbtn" id="qNext" style="display:none">Next question →</button>
 </div>
 
 <div id="wowtooltip"><div class="ttname"></div><div class="tttype"></div><div class="ttdesc"></div></div>
@@ -238,19 +111,18 @@ const ABILITIES = {
   bonegrinder:  {name:"Bonegrinder", icon:"ability_deathknight_bonegrinder", cat:"buffs", desc:"5 stacks = 20% damage buff"},
 };
 
-let assignment = {}; // id -> zone
-Object.keys(ABILITIES).forEach(id => assignment[id] = ABILITIES[id].cat === 'buffs' ? 'buffs' : (ABILITIES[id].cat === 'cooldowns' ? 'cooldowns' : 'essential'));
+// the full damage kit is always on the bar; buffs are always tracked
+const AVAILABLE = Object.keys(ABILITIES).filter(id => ABILITIES[id].cat !== 'buffs');
+const BUFF_IDS  = Object.keys(ABILITIES).filter(id => ABILITIES[id].cat === 'buffs');
 
-function makeIcon(id, small, stackCount){
+function makeIcon(id, stackCount){
   const a = ABILITIES[id];
   const el = document.createElement('div');
-  el.className = small ? 'icon' : 'abicon ' + a.cat;
-  el.draggable = true;
+  el.className = 'icon';
   el.id = 'ic-' + id;
-  el.ondragstart = e => e.dataTransfer.setData('text/plain', id);
   const img = '<img src="'+ICON_BASE+a.icon+'.jpg" alt="'+a.name+'" onerror="this.style.display=\'none\'">';
   const stack = stackCount ? '<span class="stack">'+stackCount+'</span>' : '';
-  el.innerHTML = img + stack + (small ? '' : '<span class="lbl">'+a.name+'</span>');
+  el.innerHTML = img + stack;
   attachTooltip(el, a.name, a.desc, a.cat);
   return el;
 }
@@ -278,184 +150,13 @@ function positionTooltip(e){
   tooltipEl.style.left = x + 'px';
   tooltipEl.style.top = y + 'px';
 }
-function colorFor(cat){
-  if(cat==='essential') return 'linear-gradient(160deg,#5a4210,#2a2210)';
-  if(cat==='cooldowns') return 'linear-gradient(160deg,#123a52,#0f2436)';
-  return 'linear-gradient(160deg,#3a1f52,#241236)';
-}
 
-function allowDrop(e){ e.preventDefault(); e.currentTarget.classList.add('dragover'); }
-function dragLeave(e){ e.currentTarget.classList.remove('dragover'); }
-function drop(e, zone){
-  e.preventDefault();
-  e.currentTarget.classList.remove('dragover');
-  const id = e.dataTransfer.getData('text/plain');
-  assignment[id] = zone;
-  render();
-}
-
-// ---------- preview resource/cooldown simulation ----------
-// Demo cooldowns are sped up 6x so testing doesn't mean sitting around for 45–100 real seconds.
-const SIM_SPEED = 6;
+// ---------- resource costs ----------
 const COST = {
   obliterate:{rune:1, grants:12}, frostscythe:{rune:1, grants:12},
   froststrike:{rp:30}, glacialadv:{rp:30},
   howlingblast:{rune:1, grants:5, freeWithRime:true}, // 1 rune normally; FREE when empowered by Rime
 };
-const CD_DEF = {
-  erw:{chargeTime:20/SIM_SPEED, maxCharges:2},
-  pillar:{time:45/SIM_SPEED}, frostwyrm:{time:100/SIM_SPEED},
-  breath:{time:60/SIM_SPEED}, reapersmark:{time:45/SIM_SPEED},
-};
-const RUNE_REGEN = 10/SIM_SPEED;
-
-function freshSim(){
-  return {
-    rp: 40, maxRP: 100,
-    runes: Array.from({length:6}, ()=>({ready:true, remaining:0})),
-    cd: { erw:{charges:2, remaining:0}, pillar:{remaining:0}, frostwyrm:{remaining:0}, breath:{remaining:0}, reapersmark:{remaining:0} },
-  };
-}
-let sim = freshSim();
-
-function readyRuneCount(){ return sim.runes.filter(r=>r.ready).length; }
-function canUse(id){
-  const c = COST[id];
-  if(!c) return true;
-  if(c.rune) return readyRuneCount() >= c.rune;
-  if(c.rp) return sim.rp >= c.rp;
-  return true;
-}
-function useEssential(id, el){
-  if(!canUse(id)){ flashDenied(el); return; }
-  const c = COST[id];
-  if(c.rune){
-    const idx = sim.runes.findIndex(r=>r.ready);
-    sim.runes[idx].ready = false;
-    sim.runes[idx].remaining = RUNE_REGEN;
-  }
-  if(c.rp) sim.rp = Math.max(0, sim.rp - c.rp);
-  if(c.grants) sim.rp = Math.min(sim.maxRP, sim.rp + c.grants);
-  flashUsed(el);
-}
-function useCooldown(id, el){
-  if(id === 'erw'){
-    if(sim.cd.erw.charges <= 0){ flashDenied(el); return; }
-    sim.cd.erw.charges--;
-    if(sim.cd.erw.remaining <= 0) sim.cd.erw.remaining = CD_DEF.erw.chargeTime;
-    flashUsed(el);
-    return;
-  }
-  if(!CD_DEF[id]) return;
-  if(sim.cd[id].remaining > 0){ flashDenied(el); return; }
-  sim.cd[id].remaining = CD_DEF[id].time;
-  flashUsed(el);
-}
-function flashDenied(el){ if(!el) return; el.classList.remove('denied'); void el.offsetWidth; el.classList.add('denied'); }
-function flashUsed(el){ if(!el) return; el.classList.remove('used'); void el.offsetWidth; el.classList.add('used'); renderPreviewOnly(); }
-
-function tickSim(){
-  const dt = 0.25;
-  sim.runes.forEach(r=>{
-    if(!r.ready){ r.remaining -= dt; if(r.remaining <= 0){ r.ready = true; r.remaining = 0; } }
-  });
-  Object.keys(sim.cd).forEach(id=>{
-    if(id === 'erw'){
-      if(sim.cd.erw.charges < CD_DEF.erw.maxCharges){
-        sim.cd.erw.remaining -= dt;
-        if(sim.cd.erw.remaining <= 0){
-          sim.cd.erw.charges++;
-          sim.cd.erw.remaining = sim.cd.erw.charges < CD_DEF.erw.maxCharges ? CD_DEF.erw.chargeTime : 0;
-        }
-      }
-    } else {
-      if(sim.cd[id].remaining > 0) sim.cd[id].remaining = Math.max(0, sim.cd[id].remaining - dt);
-    }
-  });
-  renderPreviewOnly();
-}
-setInterval(tickSim, 250);
-
-document.getElementById('resetSim').onclick = () => { sim = freshSim(); renderPreviewOnly(); };
-
-function applyIconState(el, id){
-  el.classList.add('clickable');
-  el.querySelectorAll('.swipe,.cdtext').forEach(n=>n.remove());
-  el.classList.remove('noresource','oncd');
-
-  if(COST[id]){
-    if(!canUse(id)) el.classList.add('noresource');
-    el.onclick = () => useEssential(id, el);
-  } else if(CD_DEF[id]){
-    let remaining = 0, total = 1, badge = null;
-    if(id === 'erw'){
-      remaining = sim.cd.erw.remaining; total = CD_DEF.erw.chargeTime;
-      badge = sim.cd.erw.charges;
-    } else {
-      remaining = sim.cd[id].remaining; total = CD_DEF[id].time;
-    }
-    if(id === 'erw' && badge !== null){
-      const old = el.querySelector('.stack'); if(old) old.remove();
-      const s = document.createElement('span'); s.className='stack'; s.textContent = badge; el.appendChild(s);
-    }
-    if(remaining > 0){
-      el.classList.add('oncd');
-      const pct = Math.round((remaining/total)*100);
-      const swipe = document.createElement('div');
-      swipe.className = 'swipe';
-      swipe.style.background = `conic-gradient(rgba(0,0,0,0.78) ${pct}%, transparent ${pct}%)`;
-      el.appendChild(swipe);
-      const txt = document.createElement('div');
-      txt.className = 'cdtext';
-      txt.textContent = Math.ceil(remaining);
-      el.appendChild(txt);
-    }
-    el.onclick = () => useCooldown(id, el);
-  }
-}
-
-function render(){
-  ['essential','cooldowns','buffs','unassigned'].forEach(zone=>{
-    const host = document.getElementById('icons-'+zone);
-    host.innerHTML = '';
-    Object.keys(ABILITIES).filter(id=>assignment[id]===zone).forEach(id=>{
-      host.appendChild(makeIcon(id,false));
-    });
-  });
-  renderPreviewOnly();
-}
-
-function renderPreviewOnly(){
-  const pe = document.getElementById('prevEssential'); pe.innerHTML='';
-  const pc = document.getElementById('prevCooldowns'); pc.innerHTML='';
-  const pb = document.getElementById('prevBuffs'); pb.innerHTML='';
-  Object.keys(ABILITIES).forEach(id=>{
-    if(assignment[id]==='essential'){ const el=makeIcon(id,true); pe.appendChild(el); applyIconState(el,id); }
-    if(assignment[id]==='cooldowns'){ const el=makeIcon(id,true); pc.appendChild(el); applyIconState(el,id); }
-    if(assignment[id]==='buffs') pb.appendChild(makeIcon(id,true, id==='bonegrinder' ? 2 : (id==='killingmachine' ? 2 : null)));
-  });
-  document.getElementById('prevPowerFill').style.width = sim.rp + '%';
-  document.getElementById('rpNum').textContent = Math.round(sim.rp) + ' / ' + sim.maxRP;
-  const rh = document.getElementById('prevRunes'); rh.innerHTML='';
-  sim.runes.forEach(r=>{
-    const d = document.createElement('div');
-    d.className = 'preview-rune' + (r.ready ? ' ready' : '');
-    d.title = r.ready ? 'Ready' : ('Recharging: '+r.remaining.toFixed(1)+'s');
-    rh.appendChild(d);
-  });
-}
-render();
-
-// ---------- tabs ----------
-document.querySelectorAll('.tabbtn').forEach(btn=>{
-  btn.onclick = ()=>{
-    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
-    if(btn.dataset.tab==='quiz') newQuestion();
-  };
-});
 
 // ---------- quiz engine ----------
 let score = 0, total = 0, answered = false;
@@ -527,7 +228,7 @@ function genState(){
   return s;
 }
 
-// returns the correct ability id given state and which abilities are on the configured bar
+// returns the correct ability id given the current state
 function correctAbility(s, available){
   const mainSpender = s.targets >= 3 ? 'glacialadv' : 'froststrike';   // Glacial Advance at 3+
   const mainRuneDump = s.targets >= 2 ? 'frostscythe' : 'obliterate';  // Frostscythe at 2+
@@ -564,7 +265,7 @@ function explain(s, correctId, available){
   else if(correctId==='breath') why = 'Breath of Sindragosa is ready — pair it with your burst window and keep Runic Power flowing to sustain it.';
   else if(correctId==='frostwyrm') why = "Frostwyrm's Fury is off cooldown — use it whenever it's up.";
   else if(correctId==='erw' && s.erwCharges>=2) why = 'Empower Rune Weapon is capped at 2 charges — use one before you waste value sitting at the cap.';
-  else if(correctId===mainRuneDump.toLowerCase().replace(/[^a-z]/g,'').includes('obliterate')||correctId==='obliterate'||correctId==='frostscythe'){
+  else if(correctId==='obliterate'||correctId==='frostscythe'){
     if(s.km>=2) why = `You have 2 stacks of Killing Machine — spend it immediately on ${mainRuneDump}, never risk overcapping it.`;
     else if(s.km>=1) why = `You have a Killing Machine proc — spend it now on ${mainRuneDump} rather than waiting for a second stack.`;
     else why = `No procs up and you have runes available — use ${mainRuneDump} as your default rune spender.`;
@@ -605,11 +306,7 @@ function newQuestion(){
   if(state.runesReady===0 && state.runicPower<30 && state.erwCharges===0 && !state.pillarUp && !state.frostwyrmUp && !state.rimeProc){
     state.erwCharges = 1;
   }
-  const available = Object.keys(ABILITIES).filter(id => (assignment[id]==='essential'||assignment[id]==='cooldowns'));
-  if(available.length < 3){
-    document.getElementById('qAbilityRow').innerHTML = '<p style="color:#e8a8a8;font-size:13px">Assign at least 3 damage abilities to Essential/Cooldowns in the configurator tab first.</p>';
-    return;
-  }
+  const available = AVAILABLE;
   const correct = correctAbility(state, available);
   // Breath + Pillar are pressed together as a burst macro — accept either when both are up
   let acceptSet = [correct];
@@ -630,31 +327,31 @@ function newQuestion(){
     runesHost.appendChild(d);
   }
 
-  // buffs row from configured Tracked Buffs zone
+  // buffs row
   const buffsHost = document.getElementById('qBuffsRow'); buffsHost.innerHTML='';
   // active cooldown buffs shown first with a gold "active" glow — this is how you see Pillar is running
   if(state.pillarActive){
-    const el = makeIcon('pillar', true, state.pillarRemaining);
+    const el = makeIcon('pillar', state.pillarRemaining);
     el.classList.add('activebuff');
     attachTooltip(el, 'Pillar of Frost — ACTIVE', state.pillarRemaining + 's remaining. Your burst window is running: spend Runic Power aggressively.', 'buffs');
     buffsHost.appendChild(el);
   }
-  Object.keys(ABILITIES).filter(id => assignment[id]==='buffs').forEach(id=>{
+  BUFF_IDS.forEach(id=>{
     let up, badge = null;
     if(id==='killingmachine'){ up = state.km>0; badge = state.km>0 ? state.km : null; }
     else if(id==='rime'){ up = state.rimeProc; }
     else if(id==='bonegrinder'){ up = state.bonegrinder>0; badge = state.bonegrinder>0 ? state.bonegrinder : null; }
     else up = true;
-    const el = makeIcon(id, true, badge);
+    const el = makeIcon(id, badge);
     if(!up) el.classList.add('noresource');
     buffsHost.appendChild(el);
   });
 
-  // clickable ability row — the answer IS the cooldown manager bar
+  // clickable ability row
   const abilHost = document.getElementById('qAbilityRow'); abilHost.innerHTML='';
   QUIZ_ORDER.filter(id => available.includes(id)).forEach(id=>{
     const badge = id==='erw' ? state.erwCharges : null;
-    const el = makeIcon(id, true, badge);
+    const el = makeIcon(id, badge);
     el.classList.add('big','clickable');
     const usable = quizUsable(id, state);
     if(!usable) el.classList.add(COST[id] ? 'noresource' : 'oncd');
@@ -701,7 +398,7 @@ document.querySelectorAll('.targetbtn').forEach(btn=>{
     newQuestion();
   };
 });
-newQuestion(); // quiz is the default tab — generate the first question on load
+newQuestion();
 </script>
 </body>
 </html>
