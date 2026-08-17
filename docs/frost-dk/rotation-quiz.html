@@ -51,12 +51,10 @@
   .modebtn.active{background:#3a2a10;border-color:var(--gold);color:var(--gold)}
   .modehint{font-size:12px;color:var(--text-muted);line-height:1.5;margin:0 0 12px;max-width:64ch}
 
-  /* GCD countdown */
-  .timerlabel{display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:3px}
-  .timerbar{height:6px;background:#0a0a0a;border:1px solid #000;border-radius:1px;overflow:hidden;margin-bottom:10px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.8)}
-  .timerfill{height:100%;width:100%;background:linear-gradient(180deg,#5ab8e8,#2f7ea8)}
-  .timerfill.urgent{background:linear-gradient(180deg,#e88a5a,#c0392b)}
-  .timerfill.expired{background:var(--red)}
+  /* elapsed-time readout — a stopwatch, deliberately not a countdown */
+  .elapsed{display:flex;align-items:baseline;gap:7px;margin-bottom:10px}
+  .elapsed-num{font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--text-secondary);font-variant-numeric:tabular-nums;min-width:4.2ch}
+  .elapsed-note{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
 
   /* quick-mode compact result + summary */
   .flashline{margin-top:12px;font-size:13px;font-weight:600}
@@ -124,9 +122,9 @@
     <div class="scoreline" id="scoreline">Score: 0 / 0</div>
     <div class="qtitle" id="qPrompt">1 target — what should you press next? Click the ability below.</div>
 
-    <div id="timerWrap" style="display:none">
-      <div class="timerlabel"><span>GCD window</span><span id="timerNum">1.50s</span></div>
-      <div class="timerbar"><div class="timerfill" id="timerFill"></div></div>
+    <div class="elapsed" id="timerWrap" style="display:none">
+      <span class="elapsed-num" id="timerNum">0.00s</span>
+      <span class="elapsed-note">elapsed</span>
     </div>
 
     <div class="preview" id="quizPreview">
@@ -223,21 +221,22 @@ let currentCorrect = null;
 
 // ---------- modes ----------
 // Normal: untimed, endless, full explanation after each answer.
-// Quick:  a fixed-length run where each question must be answered inside one GCD.
-//         1.5s is the *slowest* GCD in game (0 haste) — in practice you have less,
-//         so beating this window is the floor for playing the priority at speed.
+// Quick:  a fixed-length run that measures how fast you answer. 1.5s — the slowest
+//         GCD in game (0 haste) — is shown as a benchmark, NOT a cutoff: the clock
+//         keeps running past it and a slow answer is still graded on correctness.
+//         Beating the mark is the goal, missing it is information, not a failure.
 const GCD_MS = 1500;
 let mode = 'normal';
 let runLength = 10;
 let runIndex = 0;          // questions completed in the current quick run
-let runResults = [];       // {correct, reaction, chosen, answer, timedOut, targets}
+let runResults = [];       // {correct, overGCD, reaction, chosen, answer, targets}
 let qStartTime = 0;
 let timerRAF = null;
 let advanceTimer = null;
 
 const MODE_HINTS = {
   normal: 'Untimed. Read the state at your own pace — every answer comes with a full explanation of the priority call.',
-  quick:  'Timed. You get 1.5s per question — the slowest GCD in the game, so anything above it is slower than you could actually press the button. Missing the window counts as wrong. Accuracy and reaction time are reported at the end.',
+  quick:  'A short run with a stopwatch. Nothing is enforced and nothing cuts you off — answer whenever you have it. Afterwards you get accuracy, reaction times, and how many answers landed inside 1.5s, the slowest GCD in the game.',
 };
 
 function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
@@ -380,27 +379,18 @@ const QUIZ_ORDER = ['obliterate','frostscythe','froststrike','glacialadv','howli
 function stopTimer(){
   if(timerRAF){ cancelAnimationFrame(timerRAF); timerRAF = null; }
 }
+// A plain stopwatch counting up — no countdown, no draining bar, no colour shift.
+// Nothing about the display escalates as time passes; the GCD comparison is made
+// afterwards in the summary, where it informs instead of rushing.
 function startTimer(){
-  const fill = document.getElementById('timerFill');
-  const num  = document.getElementById('timerNum');
-  fill.classList.remove('urgent','expired');
-  fill.style.width = '100%';
-  num.textContent = (GCD_MS/1000).toFixed(2) + 's';
+  const num = document.getElementById('timerNum');
+  num.textContent = '0.00s';
   qStartTime = performance.now();
   const step = () => {
-    const left = Math.max(0, GCD_MS - (performance.now() - qStartTime));
-    fill.style.width = (left / GCD_MS * 100) + '%';
-    if(left < 500) fill.classList.add('urgent');
-    num.textContent = (left/1000).toFixed(2) + 's';
-    if(left <= 0){ timerRAF = null; timeUp(); return; }
+    num.textContent = ((performance.now() - qStartTime)/1000).toFixed(2) + 's';
     timerRAF = requestAnimationFrame(step);
   };
   timerRAF = requestAnimationFrame(step);
-}
-function timeUp(){
-  if(answered) return;
-  document.getElementById('timerFill').classList.add('expired');
-  gradeAnswer(null, true);
 }
 
 function resetRun(){
@@ -409,7 +399,7 @@ function resetRun(){
   score = 0; total = 0; runIndex = 0; runResults = [];
   document.getElementById('summaryArea').style.display = 'none';
   document.getElementById('quizArea').style.display = 'block';
-  document.getElementById('timerWrap').style.display = mode === 'quick' ? 'block' : 'none';
+  document.getElementById('timerWrap').style.display = mode === 'quick' ? 'flex' : 'none';
   newQuestion();
 }
 
@@ -473,7 +463,7 @@ function newQuestion(){
     el.classList.add('big','clickable');
     const usable = quizUsable(id, state);
     if(!usable) el.classList.add(COST[id] ? 'noresource' : 'oncd');
-    el.onclick = () => gradeAnswer(id, false);
+    el.onclick = () => gradeAnswer(id);
     abilHost.appendChild(el);
   });
 
@@ -493,13 +483,13 @@ function updateScoreline(){
   }
 }
 
-function gradeAnswer(chosenId, timedOut){
+function gradeAnswer(chosenId){
   if(answered) return;
   answered = true;
   stopTimer();
   const reaction = performance.now() - qStartTime;
   total++;
-  const isCorrect = !timedOut && currentAccept.includes(chosenId);
+  const isCorrect = currentAccept.includes(chosenId);
   const shownCorrect = isCorrect ? chosenId : currentCorrect;
   if(isCorrect) score++;
 
@@ -514,16 +504,17 @@ function gradeAnswer(chosenId, timedOut){
 
   if(mode === 'quick'){
     runIndex++;
+    const overGCD = reaction > GCD_MS;
     runResults.push({
-      correct: isCorrect, timedOut, reaction,
+      correct: isCorrect, overGCD, reaction,
       chosen: chosenId, answer: shownCorrect, targets: state.targets,
     });
-    // keep the pace up: one compact line, then auto-advance
-    const line = timedOut
-      ? `Timed out — ${ABILITIES[shownCorrect].name} was the right call.`
-      : (isCorrect
-          ? `Correct — ${(reaction/1000).toFixed(2)}s`
-          : `${ABILITIES[shownCorrect].name} was the right call — ${(reaction/1000).toFixed(2)}s`);
+    // keep the pace up: one compact line, then auto-advance.
+    // Just the time — the GCD comparison waits for the summary.
+    const time = `${(reaction/1000).toFixed(2)}s`;
+    const line = isCorrect
+      ? `Correct — ${time}`
+      : `${ABILITIES[shownCorrect].name} was the right call — ${time}`;
     document.getElementById('qFeedback').innerHTML =
       `<div class="flashline ${isCorrect?'ok':'bad'}">${isCorrect ? '✓ ' : '✗ '}${line}</div>`;
     updateScoreline();
@@ -549,7 +540,7 @@ function showSummary(){
 
   const n = runResults.length;
   const correct = runResults.filter(r=>r.correct);
-  const answeredInTime = runResults.filter(r=>!r.timedOut);
+  const withinGCD = runResults.filter(r=>!r.overGCD);
   const acc = n ? Math.round(correct.length / n * 100) : 0;
   const avg = correct.length ? correct.reduce((s,r)=>s+r.reaction,0) / correct.length : null;
   const best = correct.length ? Math.min(...correct.map(r=>r.reaction)) : null;
@@ -558,24 +549,24 @@ function showSummary(){
   const rows = runResults.map((r,i)=>`
     <tr>
       <td>${i+1}</td>
-      <td>${r.targets >= 3 ? r.targets+' tgt' : r.targets+' tgt'}</td>
+      <td>${r.targets} tgt</td>
       <td>${ABILITIES[r.answer].name}</td>
-      <td>${r.timedOut ? '—' : (r.chosen ? ABILITIES[r.chosen].name : '—')}</td>
-      <td class="${r.timedOut || r.reaction > GCD_MS ? 'slow' : ''}">${r.timedOut ? 'timed out' : fmt(r.reaction)+'s'}</td>
+      <td>${r.chosen ? ABILITIES[r.chosen].name : '—'}</td>
+      <td class="${r.overGCD ? 'slow' : ''}">${fmt(r.reaction)}s${r.overGCD ? ' ⚑' : ''}</td>
       <td class="${r.correct ? 'res-ok' : 'res-bad'}">${r.correct ? '✓' : '✗'}</td>
     </tr>`).join('');
 
   host.innerHTML = `
     <div class="summary">
       <h3>Run complete</h3>
-      <p class="subline">${n} question${n===1?'':'s'} · 1.5s GCD window · ${selectedTargets >= 3 ? selectedTargets+' targets' : selectedTargets+' target'}</p>
+      <p class="subline">${n} question${n===1?'':'s'} · ${selectedTargets >= 3 ? selectedTargets+' targets' : selectedTargets+' target'} · 1.5s GCD shown as a benchmark, not a cutoff</p>
       <div class="sumgrid">
         <div class="sumstat"><div class="l">Accuracy</div><div class="v">${acc}<small>%</small></div></div>
         <div class="sumstat"><div class="l">Correct</div><div class="v">${correct.length}<small> / ${n}</small></div></div>
         <div class="sumstat"><div class="l">Avg reaction</div><div class="v">${fmt(avg)}<small>s</small></div></div>
-        <div class="sumstat"><div class="l">Fastest</div><div class="v">${fmt(best)}<small>s</small></div></div>
+        <div class="sumstat"><div class="l">Inside GCD</div><div class="v">${withinGCD.length}<small> / ${n}</small></div></div>
       </div>
-      <p class="subline" style="margin-bottom:.5rem">${answeredInTime.length} of ${n} answered inside the GCD window.</p>
+      <p class="subline" style="margin-bottom:.5rem">Fastest correct answer: ${fmt(best)}s. Rows flagged ⚑ took longer than one GCD.</p>
       <div style="overflow-x:auto;max-width:100%">
         <table class="runlist">
           <tr><th>#</th><th>Targets</th><th>Correct answer</th><th>You pressed</th><th>Time</th><th></th></tr>
