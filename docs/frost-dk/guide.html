@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Frost death knight — complete beginner guide</title>
+<style>
+  :root{
+    --bg:#faf9f6; --card:#ffffff; --border:#e4e1d8; --border-strong:#c9c5b8;
+    --text:#232220; --text-secondary:#5f5e58; --text-muted:#8b897f;
+    --teal:#0f6e56; --teal-bg:#e1f5ee; --teal-border:#5dcaa5;
+    --coral:#993c1d; --coral-bg:#faece7; --coral-border:#f0997b;
+    --purple:#534ab7; --purple-bg:#eeedfe; --purple-border:#afa9ec;
+    --amber:#854f0b; --amber-bg:#faeeda; --amber-border:#ef9f27;
+    --gray-bg:#f1efe8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1c1b19; --card:#252420; --border:#3a3830; --border-strong:#4d4a40;
+      --text:#eae8e0; --text-secondary:#b5b2a6; --text-muted:#8b897f;
+      --teal:#9fe1cb; --teal-bg:#0f2c25; --teal-border:#1d9e75;
+      --coral:#f0997b; --coral-bg:#341f14; --coral-border:#d85a30;
+      --purple:#cecbf6; --purple-bg:#221f3f; --purple-border:#7f77dd;
+      --amber:#fac775; --amber-bg:#3a2a0c; --amber-border:#ba7517;
+      --gray-bg:#2c2b27;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.6;padding:2.5rem 1.25rem 5rem}
+  .wrap{max-width:760px;margin:0 auto}
+  h1{font-size:26px;font-weight:600;margin:0 0 4px}
+  .sub{color:var(--text-secondary);font-size:15px;margin:0 0 2rem}
+  h2{font-size:19px;font-weight:600;margin:2.5rem 0 0.75rem;padding-top:1.5rem;border-top:0.5px solid var(--border)}
+  h2:first-of-type{border-top:none;padding-top:0;margin-top:1.5rem}
+  h3{font-size:15px;font-weight:600;margin:1.25rem 0 0.5rem}
+  p{margin:0 0 0.75rem;color:var(--text-secondary);font-size:14.5px}
+  .lead{color:var(--text);font-size:15px}
+  .card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin:0.75rem 0}
+  .tag{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:6px;margin-right:6px}
+  .tag.teal{background:var(--teal-bg);color:var(--teal)}
+  .tag.coral{background:var(--coral-bg);color:var(--coral)}
+  .tag.purple{background:var(--purple-bg);color:var(--purple)}
+  .tag.amber{background:var(--amber-bg);color:var(--amber)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:0.5rem 0 1rem}
+  th{text-align:left;color:var(--text-muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.02em;padding:6px 10px;border-bottom:0.5px solid var(--border-strong)}
+  td{padding:8px 10px;border-bottom:0.5px solid var(--border);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  ol,ul{padding-left:1.25rem;font-size:14.5px;color:var(--text-secondary)}
+  li{margin-bottom:4px}
+  .step{display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;font-size:14px}
+  .stepnum{flex:0 0 22px;height:22px;border-radius:50%;background:var(--gray-bg);color:var(--text);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .note{background:var(--amber-bg);border:0.5px solid var(--amber-border);border-radius:8px;padding:0.7rem 0.9rem;font-size:13.5px;color:var(--amber);margin:0.75rem 0}
+  .note b{color:var(--amber)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:520px){.grid2{grid-template-columns:1fr}}
+  svg text{font-family:inherit}
+  .t{font-size:13px;fill:var(--text)}
+  .ts{font-size:11.5px;fill:var(--text-secondary)}
+  .th{font-size:13px;font-weight:600;fill:var(--text)}
+  .toc{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:2rem}
+  .toc a{font-size:12.5px;color:var(--text-secondary);text-decoration:none;border:0.5px solid var(--border);border-radius:20px;padding:5px 12px}
+  .toc a:hover{border-color:var(--border-strong);color:var(--text)}
+  .src{font-size:11.5px;color:var(--text-muted);margin-top:0.25rem}
+  .subtabs{display:flex;gap:8px;margin:0.5rem 0 1rem}
+  .subtab{font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border)}
+  .subtab.purple{color:var(--purple);background:var(--purple-bg);border-color:var(--purple-border)}
+  .subtab.coral{color:var(--coral);background:var(--coral-bg);border-color:var(--coral-border)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Frost death knight — beginner guide</h1>
+<p class="sub">Patch 12.1 (Midnight Season 2). Dual-wield melee DPS built around Killing Machine procs and a Pillar of Frost burst window every 45 seconds.</p>
+
+<div class="toc">
+  <a href="#basics">The basics</a>
+  <a href="#which">Which hero talents</a>
+  <a href="#loop">The core loop</a>
+  <a href="#priority">Proc priority (the golden rule)</a>
+  <a href="#opener">Openers</a>
+  <a href="#rotation">Rotation priority</a>
+  <a href="#cooldowns">Cooldown usage</a>
+  <a href="#buffs">Buffs to maintain</a>
+  <a href="#defensives">Defensives</a>
+  <a href="#mistakes">Common mistakes</a>
+</div>
+
+<h2 id="basics">The basics</h2>
+<p class="lead">Frost is dual-wield only this season — two-hand Frost is a DPS downgrade now, skip it. Like every DK spec it runs on two resources.</p>
+<div class="grid2">
+  <div class="card">
+    <span class="tag coral">Runes</span>
+    <p style="margin-top:8px">6 runes, recharge on a Haste-scaled timer. Spent on Obliterate (single target) or Frostscythe (2+ targets) — both free of cooldown and massively amplified by Killing Machine.</p>
+  </div>
+  <div class="card">
+    <span class="tag teal">Runic Power</span>
+    <p style="margin-top:8px">Generated by spending runes and by Empower Rune Weapon. Spent on Frost Strike (1–2 targets) or Glacial Advance (3+ targets) — each point spent has a small chance to refund a rune via Runic Empowerment.</p>
+  </div>
+</div>
+<p><b>Killing Machine</b> is the proc that makes Frost tick: it's triggered by auto-attack crits (rarely by the talent Obliteration), and consuming it guarantees a crit on Obliterate/Frostscythe while also triggering Arctic Assault, Bonegrinder, and other talents. Since it mostly comes from auto-attack crits, staying in melee range constantly matters a lot for this spec.</p>
+
+<h2 id="which">Which hero talents: Rider of the Apocalypse vs Deathbringer</h2>
+<div class="grid2">
+  <div class="card">
+    <span class="tag purple">Rider of the Apocalypse</span>
+    <p style="margin-top:8px">Currently ahead on single target according to written guides — though real logs (below) show Deathbringer dominating top parses in practice right now, in both raid and Mythic+. Runs the same core rotation as Deathbringer — no separate priority list to learn.</p>
+  </div>
+  <div class="card">
+    <span class="tag coral">Deathbringer</span>
+    <p style="margin-top:8px">Built around Reaper's Mark, which detonates into stacks of Exterminate. Holds up well in both single target and AoE since Exterminate cleaves cleanly onto adds. Real top parses currently favor this heavily for Mythic+ (see the logs note below).</p>
+  </div>
+</div>
+<div class="note"><b>Good news for beginners:</b> the moment-to-moment rotation (proc priority, Obliterate/Frostscythe, Frost Strike/Glacial Advance) is identical whichever you pick — only the opener and cooldown-recall timing differ. Pick either; you're not locking yourself into a different playstyle.</div>
+<div class="note"><b>Checked against real logs, across all 5 raid bosses with a meaningful heroic sample, plus 3 Mythic+ dungeons:</b> Deathbringer dominates overall — roughly 15 of 17 distinct top players checked across Nek'zali, Entombed Sentinels, Twin Fangs, Vashnik the Malignant, and Sszorak (heroic) ran Deathbringer, plus 10/12 in Mythic+. But it isn't uniform: on Entombed Sentinels, Twin Fangs, Vashnik, and Sszorak, Deathbringer was close to a clean sweep, while on <b>Nek'zali specifically</b>, 2 of the top 5 distinct players ran Rider — the only boss where Rider showed up more than once. That's a small sample and could easily be individual preference rather than a real fight-specific edge, but it's the one place the data doesn't point overwhelmingly one direction, so it's worth knowing Nek'zali might be a fight where Rider is more viable than elsewhere.</div>
+<p class="src">Source: Obli, "How to play Frost DK in Midnight Season 2" (YouTube); Boostmatch Frost DK 12.1 guide; cross-checked against Warcraft Logs rankings across all 5 heroic-logged bosses in The Venomous Abyss (zone 54) and 3 dungeons in zone 56 Mythic+</p>
+
+<h2 id="loop">The core loop</h2>
+<svg width="100%" viewBox="0 0 680 260" role="img" aria-label="Diagram of the resource loop: spending runes on Obliterate or Frostscythe generates Runic Power and a chance at Killing Machine, Runic Power is spent on Frost Strike or Glacial Advance which can proc Rime, Rime empowers a free cast of Howling Blast, and Empower Rune Weapon can be used any time to top up Runic Power or force a Killing Machine proc.">
+<defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<g>
+  <rect x="10" y="30" width="160" height="52" rx="8" fill="var(--teal-bg)" stroke="var(--teal-border)" stroke-width="0.75"/>
+  <text class="th" x="90" y="50" text-anchor="middle" fill="var(--teal)">Obliterate / Frostscythe</text>
+  <text class="ts" x="90" y="68" text-anchor="middle" fill="var(--teal)">spends runes, makes RP</text>
+</g>
+<line x1="170" y1="56" x2="222" y2="56" stroke="var(--text-muted)" stroke-width="1" marker-end="url(#a1)"/>
+<g>
+  <rect x="224" y="30" width="170" height="52" rx="8" fill="var(--coral-bg)" stroke="var(--coral-border)" stroke-width="0.75"/>
+  <text class="th" x="309" y="50" text-anchor="middle" fill="var(--coral)">Frost Strike / Glacial Advance</text>
+  <text class="ts" x="309" y="68" text-anchor="middle" fill="var(--coral)">spends Runic Power</text>
+</g>
+<line x1="394" y1="56" x2="446" y2="56" stroke="var(--text-muted)" stroke-width="1" marker-end="url(#a1)"/>
+<g>
+  <rect x="448" y="30" width="150" height="52" rx="8" fill="var(--coral-bg)" stroke="var(--coral-border)" stroke-width="0.75"/>
+  <text class="th" x="523" y="50" text-anchor="middle" fill="var(--coral)">Rime proc</text>
+  <text class="ts" x="523" y="68" text-anchor="middle" fill="var(--coral)">free Howling Blast</text>
+</g>
+<path d="M523 82 L523 130 L90 130 L90 82" fill="none" stroke="var(--text-muted)" stroke-width="1" marker-end="url(#a1)"/>
+<text class="ts" x="309" y="122" text-anchor="middle">chance to refund a rune (Runic Empowerment)</text>
+<line x1="309" y1="82" x2="309" y2="160" stroke="var(--text-muted)" stroke-width="1" marker-end="url(#a1)"/>
+<text class="ts" x="309" y="176" text-anchor="middle">every 45 seconds, on cooldown</text>
+<g>
+  <rect x="194" y="196" width="230" height="52" rx="8" fill="var(--purple-bg)" stroke="var(--purple-border)" stroke-width="0.75"/>
+  <text class="th" x="309" y="216" text-anchor="middle" fill="var(--purple)">Pillar of Frost</text>
+  <text class="ts" x="309" y="234" text-anchor="middle" fill="var(--purple)">burst window, procs matter more</text>
+</g>
+</svg>
+<p><b>Empower Rune Weapon</b> is off the global cooldown, so weave it in freely — use it whenever Runic Power is low, or whenever you're about to sit at 2 charges of it for too long (each charge you're capped on is wasted potential over the fight).</p>
+
+<h2 id="priority">The proc priority — the one rule that matters most</h2>
+<p class="lead">This is the single most important thing to internalize about Frost: procs always come before planned rune-spending, in this order.</p>
+<ol>
+  <li>2 stacks of Killing Machine — spend immediately, never risk overcapping it with another auto-attack crit</li>
+  <li>Empower Rune Weapon, if capped at 2 charges</li>
+  <li>1 stack of Killing Machine — spend it, don't wait for a second</li>
+  <li>Rime proc — cast Howling Blast (never cast Howling Blast without Rime)</li>
+  <li>Out of Runic Power — cast Empower Rune Weapon</li>
+  <li>None of the above — spend a plain rune (Obliterate/Frostscythe) with no proc attached</li>
+</ol>
+<div class="note"><b>Never</b> cast Howling Blast without a Rime proc — it doesn't hit hard enough to justify the rune cost on its own. All three sources checked (Method, Obli, Icy Veins) agree on this without exception.</div>
+<p class="src">Source: Obli, "How to play Frost DK in Midnight Season 2" (YouTube), corroborated by Method.gg and Icy Veins</p>
+<p>One nuance Icy Veins adds that the simplified list above doesn't capture: at exactly <b>one</b> stack of Killing Machine, if you're low on runes (under 3) and sitting on 70+ Runic Power, it's better to spend that Runic Power (Frost Strike, or a Rime proc if you have one) before consuming the single Killing Machine stack — the two-stack case is unaffected, that one you always consume immediately no matter what. This is a small refinement on top of the priority order above, not a contradiction of it.</p>
+
+<h2 id="opener">Openers</h2>
+<div class="subtabs"><span class="subtab purple">Rider of the Apocalypse</span></div>
+<div class="card">
+  <div class="step"><div class="stepnum">1</div>Empower Rune Weapon</div>
+  <div class="step"><div class="stepnum">2</div>Spend the Killing Machine it generates</div>
+  <div class="step"><div class="stepnum">3</div>Burst macro: Breath of Sindragosa + Pillar of Frost + Frostwyrm's Fury (you're now at 60 Runic Power from step 1–2)</div>
+  <div class="step"><div class="stepnum">4</div>Empower Rune Weapon again</div>
+  <div class="step"><div class="stepnum">5</div>Spend Killing Machines until 5 stacks of Bonegrinder</div>
+  <div class="step"><div class="stepnum">6</div>Recall Frostwyrm's Fury (via the Apex talent) once at 5 stacks</div>
+</div>
+
+<div class="subtabs"><span class="subtab coral">Deathbringer</span></div>
+<div class="card">
+  <div class="step"><div class="stepnum">1</div>Empower Rune Weapon</div>
+  <div class="step"><div class="stepnum">2</div>Reaper's Mark (cast before Pillar since it doesn't hit hard enough to want the buff)</div>
+  <div class="step"><div class="stepnum">3</div>Burst macro: Breath of Sindragosa + Pillar of Frost + Obliterate (single target) or Frostscythe (2+ targets)</div>
+  <div class="step"><div class="stepnum">4</div>Frostwyrm's Fury the next global — you're already at 5 stacks of Bonegrinder from Reaper's Mark's 3 free stacks</div>
+  <div class="step"><div class="stepnum">5</div>Consume Killing Machines as they come; save Empower Rune Weapon until after all Exterminate charges are spent, since Exterminate makes Killing Machine cost only 1 rune while Empower Rune Weapon makes the next one free — you want both effects, not one wasted early</div>
+</div>
+<p class="src">Source: Obli, "How to play Frost DK in Midnight Season 2" (YouTube)</p>
+<div class="note"><b>Sources disagree on the exact opener order — and real logs side with Obli's version.</b> Method's written opener goes Obliterate + Raise Dead → Reaper's Mark + Empower Rune Weapon → Pillar/Breath/Obliterate/trinket → Frostwyrm's Fury. Icy Veins' opener goes Empower Rune Weapon → Obliterate → Reaper's Mark → Remorseless Winter → Breath/Pillar/potion/trinket/Raise Dead → Frostwyrm's Fury. Obli's goes Empower Rune Weapon → Reaper's Mark → burst macro → Frostwyrm's Fury next global. Pulling one of the only 3 logged parses on the new raid's first boss (a Deathbringer log), the actual cast order was: Empower Rune Weapon → Reaper's Mark → potion → Breath of Sindragosa + Raise Dead + Pillar of Frost (cast together via macro) → trinket → Frostwyrm's Fury → Obliterate. That matches Obli's stated order closely and does not match Method's claim of Obliterate coming first. With the raid this new, one log isn't proof, but it's a real data point that disagrees with one of the three written guides.</div>
+
+<h2 id="rotation">Rotation priority</h2>
+<div class="subtabs"><span class="subtab purple">Single target</span></div>
+<ol>
+  <li>Pillar of Frost</li>
+  <li>Frostwyrm's Fury</li>
+  <li>Empower Rune Weapon — if you have 2 charges banked, or Breath of Sindragosa is off cooldown and you're under 60 Runic Power</li>
+  <li>Breath of Sindragosa, if talented</li>
+  <li>On-use trinket</li>
+  <li>Obliterate, if you have 2 stacks of Killing Machine</li>
+  <li>Frost Strike, if you have 1 or fewer runes, or 5 stacks of Razorice (Shattering Blade talented)</li>
+  <li>Obliterate, if you have Killing Machine</li>
+  <li>Howling Blast, if you have a Rime proc</li>
+  <li>Frost Strike, if 75+ Runic Power or Pillar of Frost is active</li>
+  <li>Empower Rune Weapon, if under 35 Runic Power</li>
+  <li>Obliterate</li>
+  <li>Frost Strike</li>
+  <li>Raise Dead</li>
+</ol>
+
+<div class="subtabs"><span class="subtab coral">Multi-target (3+)</span></div>
+<ol>
+  <li>Pillar of Frost</li>
+  <li>Frostwyrm's Fury — one at the start of Pillar, save the Recall for the next Pillar</li>
+  <li>Empower Rune Weapon — same conditions as single target</li>
+  <li>Breath of Sindragosa, if talented</li>
+  <li>On-use trinket</li>
+  <li>Frost Strike, if Frostbane is active</li>
+  <li>Frostscythe, if you have Killing Machine</li>
+  <li>Howling Blast, if you have a Rime proc</li>
+  <li>Glacial Advance, if 75+ Runic Power or Pillar of Frost is active</li>
+  <li>Frostscythe</li>
+  <li>Frost Strike</li>
+  <li>Raise Dead</li>
+</ol>
+<p class="src">Source: Method.gg Frost Death Knight guide (Rider of the Apocalypse build). Deathbringer's priority is nearly identical with Reaper's Mark inserted — see Method's guide for the exact list.</p>
+
+<h2 id="cooldowns">Cooldown usage</h2>
+<table>
+<tr><th>Ability</th><th>How to use it</th></tr>
+<tr><td><b>Pillar of Frost</b></td><td>Use on cooldown almost always. If playing Obliteration, pool 3–4 runes beforehand so you're not rune-starved during the window.</td></tr>
+<tr><td><b>Empower Rune Weapon</b></td><td>Off the global cooldown — weave it freely. Also generates a Killing Machine proc, useful for topping up Bonegrinder stacks before they drop.</td></tr>
+<tr><td><b>Frostwyrm's Fury</b></td><td>Use right after Pillar of Frost starts, both for damage and for the Apex-talent Pillar extension. Recall timing differs by hero tree — see the opener steps above.</td></tr>
+<tr><td><b>Breath of Sindragosa</b></td><td>Always paired with Pillar of Frost. Keep generating and spending Killing Machine/Rime procs to extend its duration through and past the Pillar window.</td></tr>
+</table>
+<p class="src">Source: Method.gg Frost Death Knight guide</p>
+
+<h2 id="buffs">Buffs to maintain</h2>
+<ul>
+  <li><b>Icy Talons</b> — sustained by spending Runic Power (Frost Strike/Glacial Advance/Death Strike). Important for auto-attack damage and for triggering Killing Machine itself, so letting it fall off compounds.</li>
+  <li><b>Razorice</b> — stacks to 5, applied by Rune of Razorice / Glacial Advance / Rime (with Avalanche talented). Dropping it and rebuilding to 5 stacks is a real throughput loss, so keep uptime on your target consistent. Shattering Blade changes this: your Frost Strike clears Razorice at 5 stacks on purpose, so keep Rune of Razorice on your main hand to rebuild it quickly.</li>
+  <li><b>Bonegrinder</b> — 5 stacks gives a 20% damage buff. Use Empower Rune Weapon to force a Killing Machine proc if you're at risk of it dropping right before Pillar of Frost.</li>
+  <li><b>Gathering Storm</b> — hard to sustain outside of Bloodlust since it eats a lot of runes, but worth maintaining as much as possible, especially in AoE.</li>
+</ul>
+<p class="src">Source: Method.gg Frost Death Knight guide</p>
+
+<h2 id="defensives">Defensives</h2>
+<ul>
+  <li><b>Anti-Magic Shell</b> — immune to many magic debuffs, but only if used <i>before</i> the debuff lands. Grants Runic Power based on damage absorbed.</li>
+  <li><b>Icebound Fortitude</b> — heavy mitigation + stun immunity, 2 minute cooldown.</li>
+  <li><b>Death Strike</b> — heals off a big hit; use after large damage events when out of potions/healthstones.</li>
+  <li><b>Lichborne</b> — niche vs Fear/Charm/Sleep; decent Leech source, better in AoE than single target.</li>
+  <li><b>Anti-Magic Zone</b> — raid/party magic defensive, loses value the more allies stand in it.</li>
+  <li><b>Death Grip</b> — pulls enemies in; also works as a pseudo-interrupt since it counts as crowd control.</li>
+  <li><b>Death's Advance</b> — your main mobility tool without Wraith Walk talented; also grants knockback immunity.</li>
+</ul>
+<p class="src">Source: Method.gg Frost Death Knight guide</p>
+
+<h2 id="mistakes">Common mistakes to avoid</h2>
+<ul>
+  <li>Letting a Killing Machine stack sit instead of spending it immediately — risking an overcap is a real damage loss</li>
+  <li>Casting Howling Blast without a Rime proc — it isn't worth the rune otherwise</li>
+  <li>Using Obliterate on 2+ targets instead of switching to Frostscythe, or Frost Strike on 3+ targets instead of switching to Glacial Advance</li>
+  <li>Letting Empower Rune Weapon sit capped at 2 charges for a long stretch — that's wasted casts over the whole fight</li>
+  <li>Playing two-hand Frost this season — dual-wield is required to make the most of Icy Death Torrent and the current tier set</li>
+  <li>Casting Reaper's Mark or Remorseless Winter as the very first ability inside Pillar of Frost — neither triggers Killing Machine, so it wastes a proc-generation window</li>
+  <li>Not tracking Bonegrinder stacks — walking into Pillar of Frost without 5 stacks banked loses the 20% damage buff during your best window</li>
+</ul>
+
+<div class="note"><b>A note on sources:</b> this guide was checked against four sources rather than two — Method.gg, Obli's Season 2 YouTube guide, Icy Veins (last updated Aug 10, 2026), and real Warcraft Logs data across Mythic+ (12 top parses, 3 dungeons) and every raid boss with a meaningful heroic sample (Nek'zali, Entombed Sentinels, Twin Fangs, Vashnik the Malignant, Sszorak — 17 distinct top players checked total).
+<br><br>
+Where they agree — the core proc priority (Killing Machine before Rime before plain rune spending, never Howling Blast without Rime), and both hero trees running the same core rotation — that's presented above as settled, and the proc priority specifically held up in the logs too (Frostwyrm's Fury and Reaper's Mark both cast roughly every 45s on cooldown, matching what the guides claim).
+<br><br>
+Where checking the logs changed something: the opener order in the raid log matched Obli's video, not Method's written sequence (flagged above). And on hero talent choice — both guides frame Rider and Deathbringer as close, with Obli specifically saying Rider wins on single target — but the actual top parses, checked across every boss with enough heroic data plus three Mythic+ dungeons, are overwhelmingly Deathbringer, with Nek'zali as the one specific exception where Rider shows up repeatedly. That's worth trusting over the written guides' framing, since it reflects what top players are actually doing with the current tuning rather than a theorycrafted estimate — though it's also possible Deathbringer's edge partly reflects raid comp or player skill rather than the spec itself, which logs alone can't fully separate out.
+<br><br>
+One transparency note: my first pass at checking the Mythic+ logs gave a bad read on one log (an empty query result that looked like "Rider" but wasn't, caught by re-verifying with a different query method). The numbers above are from the corrected, re-verified pass, and every genuinely empty ("Rider") result in the final tallies was re-run at least once to rule out the same issue.
+<br><br>
+Bonegrinder is still covered in detail by Method but doesn't appear in Icy Veins' writeup — that discrepancy is unresolved and worth treating as slightly less certain than the rest of this guide.</div>
+
+</div>
+</body>
+</html>

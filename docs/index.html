@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WoW Class Tools</title>
+<style>
+  :root{--bg:#0f0f10;--panel:#1a1a1c;--border:#33333a;--text:#eae8e0;--text2:#a8a6a0;--muted:#78766f;--gold:#e8b339}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;padding:2.5rem 1.25rem}
+  .wrap{max-width:720px;margin:0 auto}
+  h1{font-family:Georgia,'Times New Roman',serif;color:#f2d98a;font-size:26px;margin:0 0 6px}
+  .sub{color:var(--text2);font-size:14px;margin:0 0 2rem}
+  h2{font-family:Georgia,serif;color:#d8c58a;font-size:16px;border-bottom:1px solid #33301f;padding-bottom:5px;margin:2rem 0 0.75rem}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:560px){.cards{grid-template-columns:1fr}}
+  a.card{display:block;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;text-decoration:none;color:var(--text)}
+  a.card:hover{border-color:var(--gold)}
+  a.card .t{font-weight:600;font-size:15px;margin-bottom:4px}
+  a.card .d{color:var(--text2);font-size:13px;line-height:1.5}
+  .soon{opacity:.45;pointer-events:none}
+  .foot{color:var(--muted);font-size:12px;margin-top:2.5rem;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>WoW Class Tools</h1>
+  <p class="sub">Guides and interactive rotation trainers, validated against Method.gg, Icy Veins, YouTube guides, and real Warcraft Logs data. Patch 12.1 (Midnight Season 2).</p>
+
+  <h2>Frost Death Knight</h2>
+  <div class="cards">
+    <a class="card" href="frost-dk/guide.html">
+      <div class="t">Beginner guide</div>
+      <div class="d">Resources, proc priority, openers, rotation lists, cooldowns, defensives, and common mistakes — cross-checked against four sources including real top-parse logs.</div>
+    </a>
+    <a class="card" href="frost-dk/rotation-quiz.html">
+      <div class="t">Cooldown Manager &amp; rotation quiz</div>
+      <div class="d">Configure a Cooldown Manager layout, then drill "what do I press next" against scenarios drawn from real top-player cast distributions. 1 / 2 / 5 target modes.</div>
+    </a>
+  </div>
+
+  <h2>Coming later</h2>
+  <div class="cards">
+    <a class="card soon" href="#"><div class="t">Unholy Death Knight</div><div class="d">Guide exists — quiz not yet built.</div></a>
+    <a class="card soon" href="#"><div class="t">Devourer Demon Hunter</div><div class="d">Guide exists — quiz not yet built.</div></a>
+  </div>
+
+  <div class="foot">
+    Ability icons are Blizzard's, served via the Wowhead icon CDN using the same filenames Warcraft Logs' API returns. Rotation logic sourced from Method.gg, Icy Veins, and Obli's Season 2 guides; scenario distributions calibrated from top-ranked Warcraft Logs parses. Not affiliated with Blizzard Entertainment.
+  </div>
+</div>
+</body>
+</html>
