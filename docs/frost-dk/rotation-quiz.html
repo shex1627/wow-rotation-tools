@@ -43,6 +43,40 @@
 
   /* quiz */
   .qtitle{font-size:14px;font-weight:600;margin-bottom:10px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;margin-bottom:8px}
+  .ctlgroup{display:flex;align-items:center;gap:6px}
+  .ctl-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-right:2px}
+  .modebtn{background:var(--panel2);border:1px solid var(--border-strong);border-radius:3px;color:var(--text-secondary);font-size:12px;font-weight:700;padding:0 12px;height:28px;cursor:pointer;font-family:Georgia,serif}
+  .modebtn:hover{border-color:var(--gold)}
+  .modebtn.active{background:#3a2a10;border-color:var(--gold);color:var(--gold)}
+  .modehint{font-size:12px;color:var(--text-muted);line-height:1.5;margin:0 0 12px;max-width:64ch}
+
+  /* GCD countdown */
+  .timerlabel{display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:3px}
+  .timerbar{height:6px;background:#0a0a0a;border:1px solid #000;border-radius:1px;overflow:hidden;margin-bottom:10px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.8)}
+  .timerfill{height:100%;width:100%;background:linear-gradient(180deg,#5ab8e8,#2f7ea8)}
+  .timerfill.urgent{background:linear-gradient(180deg,#e88a5a,#c0392b)}
+  .timerfill.expired{background:var(--red)}
+
+  /* quick-mode compact result + summary */
+  .flashline{margin-top:12px;font-size:13px;font-weight:600}
+  .flashline.ok{color:#a8e8b8}
+  .flashline.bad{color:#e8a8a8}
+  .summary{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.2rem}
+  .summary h3{font-family:Georgia,serif;color:#f2d98a;font-size:17px;margin:0 0 2px}
+  .summary .subline{color:var(--text-muted);font-size:12px;margin:0 0 1rem}
+  .sumgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.1rem}
+  @media(max-width:600px){.sumgrid{grid-template-columns:repeat(2,1fr)}}
+  .sumstat{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 10px}
+  .sumstat .l{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .sumstat .v{font-size:19px;font-weight:700;font-family:Georgia,serif}
+  .sumstat .v small{font-size:11px;color:var(--text-muted);font-weight:400;font-family:inherit}
+  .runlist{width:100%;border-collapse:collapse;font-size:12px}
+  .runlist th{text-align:left;color:var(--text-muted);font-weight:600;font-size:10px;text-transform:uppercase;padding:5px 8px;border-bottom:1px solid var(--border-strong)}
+  .runlist td{padding:5px 8px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+  .runlist td.res-ok{color:var(--green);font-weight:700}
+  .runlist td.res-bad{color:var(--red);font-weight:700}
+  .runlist td.slow{color:#e8a05a}
   .feedback{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.5}
   .feedback.ok{background:#123a1c;border:1px solid var(--green);color:#a8e8b8}
   .feedback.bad{background:#3a1414;border:1px solid var(--red);color:#e8a8a8}
@@ -66,26 +100,49 @@
   <h1>Frost death knight — rotation quiz</h1>
   <p class="sub">Patch 12.1. Read the resource and proc state, then press what comes next. Scenarios are drawn from real top-parse cast distributions.</p>
 
-  <div class="scoreline" id="scoreline">Score: 0 / 0</div>
-  <div class="targetsel">
-    <span class="targetsel-label">Targets:</span>
-    <button class="targetbtn active" data-targets="1">1</button>
-    <button class="targetbtn" data-targets="2">2</button>
-    <button class="targetbtn" data-targets="5">5</button>
+  <div class="controls">
+    <div class="ctlgroup">
+      <span class="ctl-label">Mode:</span>
+      <button class="modebtn active" data-mode="normal">Normal</button>
+      <button class="modebtn" data-mode="quick">Quick — timed</button>
+    </div>
+    <div class="ctlgroup" id="lengthGroup" style="display:none">
+      <span class="ctl-label">Questions:</span>
+      <button class="targetbtn active" data-len="10">10</button>
+      <button class="targetbtn" data-len="1">1</button>
+    </div>
+    <div class="ctlgroup">
+      <span class="ctl-label">Targets:</span>
+      <button class="targetbtn active" data-targets="1">1</button>
+      <button class="targetbtn" data-targets="2">2</button>
+      <button class="targetbtn" data-targets="5">5</button>
+    </div>
   </div>
-  <div class="qtitle" id="qPrompt">1 target — what should you press next? Click the ability below.</div>
+  <p class="modehint" id="modeHint">Untimed. Read the state at your own pace — every answer comes with a full explanation of the priority call.</p>
 
-  <div class="preview" id="quizPreview">
-    <div class="preview-row-label" style="margin-top:0">Buffs</div>
-    <div class="preview-row" id="qBuffsRow"></div>
-    <div class="preview-runes" id="qRunesGrid" style="margin-top:8px"></div>
-    <div class="preview-power"><div class="preview-power-fill" id="qRPfill" style="width:0%"></div><div class="preview-power-num" id="qRPnum">0 / 100</div></div>
-    <div class="preview-row-label">Abilities — click your answer</div>
-    <div class="preview-row" id="qAbilityRow"></div>
+  <div id="quizArea">
+    <div class="scoreline" id="scoreline">Score: 0 / 0</div>
+    <div class="qtitle" id="qPrompt">1 target — what should you press next? Click the ability below.</div>
+
+    <div id="timerWrap" style="display:none">
+      <div class="timerlabel"><span>GCD window</span><span id="timerNum">1.50s</span></div>
+      <div class="timerbar"><div class="timerfill" id="timerFill"></div></div>
+    </div>
+
+    <div class="preview" id="quizPreview">
+      <div class="preview-row-label" style="margin-top:0">Buffs</div>
+      <div class="preview-row" id="qBuffsRow"></div>
+      <div class="preview-runes" id="qRunesGrid" style="margin-top:8px"></div>
+      <div class="preview-power"><div class="preview-power-fill" id="qRPfill" style="width:0%"></div><div class="preview-power-num" id="qRPnum">0 / 100</div></div>
+      <div class="preview-row-label">Abilities — click your answer</div>
+      <div class="preview-row" id="qAbilityRow"></div>
+    </div>
+
+    <div id="qFeedback"></div>
+    <button class="nextbtn" id="qNext" style="display:none">Next question →</button>
   </div>
 
-  <div id="qFeedback"></div>
-  <button class="nextbtn" id="qNext" style="display:none">Next question →</button>
+  <div id="summaryArea" style="display:none"></div>
 </div>
 
 <div id="wowtooltip"><div class="ttname"></div><div class="tttype"></div><div class="ttdesc"></div></div>
@@ -162,6 +219,26 @@ const COST = {
 let score = 0, total = 0, answered = false;
 let state = {};
 let currentAccept = [];
+let currentCorrect = null;
+
+// ---------- modes ----------
+// Normal: untimed, endless, full explanation after each answer.
+// Quick:  a fixed-length run where each question must be answered inside one GCD.
+//         1.5s is the *slowest* GCD in game (0 haste) — in practice you have less,
+//         so beating this window is the floor for playing the priority at speed.
+const GCD_MS = 1500;
+let mode = 'normal';
+let runLength = 10;
+let runIndex = 0;          // questions completed in the current quick run
+let runResults = [];       // {correct, reaction, chosen, answer, timedOut, targets}
+let qStartTime = 0;
+let timerRAF = null;
+let advanceTimer = null;
+
+const MODE_HINTS = {
+  normal: 'Untimed. Read the state at your own pace — every answer comes with a full explanation of the priority call.',
+  quick:  'Timed. You get 1.5s per question — the slowest GCD in the game, so anything above it is slower than you could actually press the button. Missing the window counts as wrong. Accuracy and reaction time are reported at the end.',
+};
 
 function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 function chance(p){ return Math.random() < p; }
@@ -299,7 +376,47 @@ function quizUsable(id, s){
 
 const QUIZ_ORDER = ['obliterate','frostscythe','froststrike','glacialadv','howlingblast','pillar','reapersmark','breath','frostwyrm','erw'];
 
+// ---------- GCD countdown (quick mode only) ----------
+function stopTimer(){
+  if(timerRAF){ cancelAnimationFrame(timerRAF); timerRAF = null; }
+}
+function startTimer(){
+  const fill = document.getElementById('timerFill');
+  const num  = document.getElementById('timerNum');
+  fill.classList.remove('urgent','expired');
+  fill.style.width = '100%';
+  num.textContent = (GCD_MS/1000).toFixed(2) + 's';
+  qStartTime = performance.now();
+  const step = () => {
+    const left = Math.max(0, GCD_MS - (performance.now() - qStartTime));
+    fill.style.width = (left / GCD_MS * 100) + '%';
+    if(left < 500) fill.classList.add('urgent');
+    num.textContent = (left/1000).toFixed(2) + 's';
+    if(left <= 0){ timerRAF = null; timeUp(); return; }
+    timerRAF = requestAnimationFrame(step);
+  };
+  timerRAF = requestAnimationFrame(step);
+}
+function timeUp(){
+  if(answered) return;
+  document.getElementById('timerFill').classList.add('expired');
+  gradeAnswer(null, true);
+}
+
+function resetRun(){
+  stopTimer();
+  clearTimeout(advanceTimer);
+  score = 0; total = 0; runIndex = 0; runResults = [];
+  document.getElementById('summaryArea').style.display = 'none';
+  document.getElementById('quizArea').style.display = 'block';
+  document.getElementById('timerWrap').style.display = mode === 'quick' ? 'block' : 'none';
+  newQuestion();
+}
+
 function newQuestion(){
+  stopTimer();
+  clearTimeout(advanceTimer);
+  if(mode === 'quick' && runIndex >= runLength){ showSummary(); return; }
   answered = false;
   state = genState();
   // guarantee at least one castable option exists so "correct" is always a real press
@@ -308,6 +425,7 @@ function newQuestion(){
   }
   const available = AVAILABLE;
   const correct = correctAbility(state, available);
+  currentCorrect = correct;
   // Breath + Pillar are pressed together as a burst macro — accept either when both are up
   let acceptSet = [correct];
   if(correct==='pillar' && state.breathUp && available.includes('breath')) acceptSet.push('breath');
@@ -355,25 +473,38 @@ function newQuestion(){
     el.classList.add('big','clickable');
     const usable = quizUsable(id, state);
     if(!usable) el.classList.add(COST[id] ? 'noresource' : 'oncd');
-    el.onclick = () => submitAnswer(id, correct, available);
+    el.onclick = () => gradeAnswer(id, false);
     abilHost.appendChild(el);
   });
 
   document.getElementById('qFeedback').innerHTML = '';
   document.getElementById('qNext').style.display = 'none';
+  updateScoreline();
+  if(mode === 'quick') startTimer();
+  else qStartTime = performance.now();
 }
 
-function submitAnswer(chosenId, correctId, available){
+function updateScoreline(){
+  const el = document.getElementById('scoreline');
+  if(mode === 'quick'){
+    el.textContent = `Question ${Math.min(runIndex + 1, runLength)} / ${runLength} · ${score} correct`;
+  } else {
+    el.textContent = `Score: ${score} / ${total}`;
+  }
+}
+
+function gradeAnswer(chosenId, timedOut){
   if(answered) return;
   answered = true;
+  stopTimer();
+  const reaction = performance.now() - qStartTime;
   total++;
-  const isCorrect = currentAccept.includes(chosenId);
-  const shownCorrect = isCorrect ? chosenId : correctId;
+  const isCorrect = !timedOut && currentAccept.includes(chosenId);
+  const shownCorrect = isCorrect ? chosenId : currentCorrect;
   if(isCorrect) score++;
-  document.getElementById('scoreline').textContent = `Score: ${score} / ${total}`;
 
-  const abilHost = document.getElementById('qAbilityRow');
-  abilHost.querySelectorAll('.icon').forEach(el=>{
+  // mark the icon row
+  document.getElementById('qAbilityRow').querySelectorAll('.icon').forEach(el=>{
     const id = el.id.replace('ic-','');
     if(currentAccept.includes(id)) el.classList.add('qcorrect');
     if(!isCorrect && id === chosenId) el.classList.add('qwrong');
@@ -381,23 +512,112 @@ function submitAnswer(chosenId, correctId, available){
     el.classList.remove('clickable');
   });
 
-  const fb = document.getElementById('qFeedback');
-  const why = explain(state, shownCorrect, available);
-  fb.innerHTML = `<div class="feedback ${isCorrect?'ok':'bad'}">
+  if(mode === 'quick'){
+    runIndex++;
+    runResults.push({
+      correct: isCorrect, timedOut, reaction,
+      chosen: chosenId, answer: shownCorrect, targets: state.targets,
+    });
+    // keep the pace up: one compact line, then auto-advance
+    const line = timedOut
+      ? `Timed out — ${ABILITIES[shownCorrect].name} was the right call.`
+      : (isCorrect
+          ? `Correct — ${(reaction/1000).toFixed(2)}s`
+          : `${ABILITIES[shownCorrect].name} was the right call — ${(reaction/1000).toFixed(2)}s`);
+    document.getElementById('qFeedback').innerHTML =
+      `<div class="flashline ${isCorrect?'ok':'bad'}">${isCorrect ? '✓ ' : '✗ '}${line}</div>`;
+    updateScoreline();
+    advanceTimer = setTimeout(newQuestion, 1100);
+    return;
+  }
+
+  // normal mode: full explanation, manual advance
+  const why = explain(state, shownCorrect, AVAILABLE);
+  document.getElementById('qFeedback').innerHTML = `<div class="feedback ${isCorrect?'ok':'bad'}">
     <b>${isCorrect ? 'Correct — ' : 'Not quite — '}${ABILITIES[shownCorrect].name} was the right call.</b><br>${why}
   </div>`;
+  updateScoreline();
   document.getElementById('qNext').style.display = 'inline-block';
 }
 
+// ---------- quick-mode summary ----------
+function showSummary(){
+  stopTimer();
+  document.getElementById('quizArea').style.display = 'none';
+  const host = document.getElementById('summaryArea');
+  host.style.display = 'block';
+
+  const n = runResults.length;
+  const correct = runResults.filter(r=>r.correct);
+  const answeredInTime = runResults.filter(r=>!r.timedOut);
+  const acc = n ? Math.round(correct.length / n * 100) : 0;
+  const avg = correct.length ? correct.reduce((s,r)=>s+r.reaction,0) / correct.length : null;
+  const best = correct.length ? Math.min(...correct.map(r=>r.reaction)) : null;
+  const fmt = ms => ms === null ? '—' : (ms/1000).toFixed(2);
+
+  const rows = runResults.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${r.targets >= 3 ? r.targets+' tgt' : r.targets+' tgt'}</td>
+      <td>${ABILITIES[r.answer].name}</td>
+      <td>${r.timedOut ? '—' : (r.chosen ? ABILITIES[r.chosen].name : '—')}</td>
+      <td class="${r.timedOut || r.reaction > GCD_MS ? 'slow' : ''}">${r.timedOut ? 'timed out' : fmt(r.reaction)+'s'}</td>
+      <td class="${r.correct ? 'res-ok' : 'res-bad'}">${r.correct ? '✓' : '✗'}</td>
+    </tr>`).join('');
+
+  host.innerHTML = `
+    <div class="summary">
+      <h3>Run complete</h3>
+      <p class="subline">${n} question${n===1?'':'s'} · 1.5s GCD window · ${selectedTargets >= 3 ? selectedTargets+' targets' : selectedTargets+' target'}</p>
+      <div class="sumgrid">
+        <div class="sumstat"><div class="l">Accuracy</div><div class="v">${acc}<small>%</small></div></div>
+        <div class="sumstat"><div class="l">Correct</div><div class="v">${correct.length}<small> / ${n}</small></div></div>
+        <div class="sumstat"><div class="l">Avg reaction</div><div class="v">${fmt(avg)}<small>s</small></div></div>
+        <div class="sumstat"><div class="l">Fastest</div><div class="v">${fmt(best)}<small>s</small></div></div>
+      </div>
+      <p class="subline" style="margin-bottom:.5rem">${answeredInTime.length} of ${n} answered inside the GCD window.</p>
+      <div style="overflow-x:auto;max-width:100%">
+        <table class="runlist">
+          <tr><th>#</th><th>Targets</th><th>Correct answer</th><th>You pressed</th><th>Time</th><th></th></tr>
+          ${rows}
+        </table>
+      </div>
+      <button class="nextbtn" id="runAgain">Run again</button>
+    </div>`;
+  document.getElementById('runAgain').onclick = resetRun;
+}
+
 document.getElementById('qNext').onclick = newQuestion;
-document.querySelectorAll('.targetbtn').forEach(btn=>{
+
+document.querySelectorAll('.targetbtn[data-targets]').forEach(btn=>{
   btn.onclick = ()=>{
-    document.querySelectorAll('.targetbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.targetbtn[data-targets]').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     selectedTargets = parseInt(btn.dataset.targets, 10);
-    newQuestion();
+    resetRun();
   };
 });
+
+document.querySelectorAll('.targetbtn[data-len]').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.targetbtn[data-len]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    runLength = parseInt(btn.dataset.len, 10);
+    resetRun();
+  };
+});
+
+document.querySelectorAll('.modebtn').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.modebtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    document.getElementById('lengthGroup').style.display = mode === 'quick' ? 'flex' : 'none';
+    document.getElementById('modeHint').textContent = MODE_HINTS[mode];
+    resetRun();
+  };
+});
+
 newQuestion();
 </script>
 </body>
